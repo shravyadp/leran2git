@@ -1,0 +1,24 @@
+did a presentation on ai and ds usage in cred.ai 
+
+1.the questions posted to us:
+in chatbot ,initially we use datas to model it from where is it collected like chat gpt ..
+did u think about the ways that can have security to the data of the customers
+
+chatbot
+1.webscapping and getting google reviews of cred.ai
+2.nlp,sentiment ana on comment
+3.preprocessing
+4.tablue
+
+customer segmentation
+transaction
+data from diff and past bank transactions will be given by them 
+
+
+2.the doubts we have:
+
+
+key elements:
+jumpstart
+segmint/segment
+"https://segmint.com/reach"
