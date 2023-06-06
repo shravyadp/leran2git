@@ -1,0 +1,124 @@
+"1.Create a database schema for a simple e-commerce application that includes tables for products, customers,
+ orders, and order details. Define the appropriate relationships between these tables and create sample data."
+
+create database ecomm;
+use ecomm;
+create table producte(prd_id int primary key,
+prd_name char(20),
+p_price int,
+inv_count int
+);
+create table customere(cust_id int primary key,
+cust_name char(20)
+);
+create table ordere(order_id int primary key,
+cust_id int,
+prd_id int,
+quantity int,
+foreign key (cust_id) references customere (cust_id),
+foreign key (prd_id) references producte (prd_id)
+);
+
+create table order_dete(order_id int,
+od_date date,
+foreign key (order_id) references ordere (order_id)
+);
+
+insert into producte values(101,'shirt',700,5);
+insert into producte values(103,'pant',800,4);
+insert into producte values(105,'t-shirt',400,3);
+insert into producte values(107,'jean',700,1);
+insert into producte values(108,'tie',200,3);
+
+insert into customere values(1,'Rysha');
+insert into customere values(7,'Shravya');
+insert into customere values(5,'Shivaani');
+insert into customere values(3,'Rishi');
+
+insert into ordere values(1001,1,101,2);
+insert into ordere values(1043,7,101,1);
+insert into ordere values(1074,5,103,2);
+insert into ordere values(1032,1,105,1);
+insert into ordere values(1075,3,107,3);
+
+insert into order_dete values(1001,'2022-12-07');
+insert into order_dete values(1043,'2023-01-04');
+insert into order_dete values(1074,'2023-01-01');
+insert into order_dete values(1032,'2023-04-15');
+insert into order_dete values(1075,'2023-05-25');
+
+"2.Write SQL queries to retrieve the total number of orders for each customer and display the results."
+
+select c.cust_name ,count(o.order_id) from customere c
+join ordere o on c.cust_id=o.cust_id 
+group by c.cust_name;
+
+"3.Create a stored procedure that inserts a new product into the database and updates the inventory count."
+
+delimiter //
+create procedure addproduct9(in pid int,in pname varchar(50),in pprice int,in inv_coun int)
+begin
+  insert into producte (prd_id, prd_name, p_price, inv_count)
+  values (pid, pname, pprice, inv_coun);
+  update producte
+  set inv_count= inv_coun
+  where prd_id = pid;
+end //
+delimiter ;
+select * from producte;
+call addproduct9(1003,'nike',400,4);
+
+
+
+"4.Write a SQL query to find the top-selling products based on the total quantity ordered."
+select p.prd_name,sum(o.quantity) from producte p 
+join ordere o on p.prd_id=o.prd_id 
+group by p.prd_name
+order by  sum(o.quantity) desc;
+
+
+"5.Write a query to find the top 5 customers with the highest total order amount."
+
+"since I have only 4 customers I will take top 2 customers"
+
+select c.cust_name , sum(p.p_price*quantity) from customere c 
+join producte p 
+group by c.cust_name;
+
+select o.cust_id ,sum(p.p_price*o.quantity) as amount from ordere o 
+join producte p on o.prd_id=p.prd_id 
+group by o.cust_id 
+order by sum(p.p_price*o.quantity) desc 
+limit 2;
+
+"6.Write a query to retrieve the names of all products that have not been ordered yet."
+
+select prd_name from producte
+where  prd_id not in (select prd_id from ordere);
+
+select p.prd_name from producte p left join ordere o on o.prd_id=p.prd_id where o.prd_id is null;
+
+"7.Write a query to find the most recent order date for each customer."
+
+select c.cust_name , max(d.od_date) as latest from customere c 
+join ordere o on o.cust_id=c.cust_id 
+join order_dete d on o.order_id=d.order_id 
+group by  c.cust_id,c.cust_name;  
+
+"8.Write a query to find the total sales revenue for each month of the year."
+
+select month(od_date) as month , sum(p_price* quantity) from producte p 
+join ordere o on p.prd_id=o.prd_id 
+join order_dete d on o.order_id=d.order_id group by month(od_date);
+
+
+"9.Write a query to find the customers who have placed orders in the last 30 days."
+
+select c.cust_name , d.od_date from customere c 
+join ordere o on o.cust_id=c.cust_id 
+join order_dete d on o.order_id=d.order_id where d.od_date >= CURDATE() - interval 30 day ; 
+
+"10.Write a query to retrieve the products that have a price higher than the average price of all products."
+
+select prd_name from producte p where p_price >
+(select avg(p_price) from producte);
